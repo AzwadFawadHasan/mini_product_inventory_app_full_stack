@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ProductController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -28,4 +29,13 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
+
+    // Product Management Routes
+    Route::apiResource('products', ProductController::class);
+    // This single line ^ creates the following routes:
+    // GET       /api/products             (index)   - products.index
+    // POST      /api/products             (store)   - products.store
+    // GET       /api/products/{product}   (show)    - products.show
+    // PUT/PATCH /api/products/{product}   (update)  - products.update
+    // DELETE    /api/products/{product}   (destroy) - products.destroy
 });
