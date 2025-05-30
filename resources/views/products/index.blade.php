@@ -13,6 +13,9 @@
 
     {{-- Alert for messages --}}
     <div id="product-message" class="alert" style="display: none;"></div>
+    <div class="mb-3 text-end">
+        <button id="logout-button" class="btn btn-outline-danger">Logout</button>
+    </div>
 
     {{-- Product table will be populated by JavaScript --}}
     <table class="table table-striped table-hover">
