@@ -5,20 +5,28 @@ Building a small full-stack web app to manage products in inventory, built with 
 
 ## Table of Contents
 
+
 - [Project Overview](#project-overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
+- [Getting Started (Without Docker)](#getting-started-without-docker)
   - [1. Clone the Repository](#1-clone-the-repository)
-  - [2. Install Dependencies](#2-install-dependencies)
-  - [3. Environment Configuration](#3-environment-configuration)
-  - [4. Database Setup](#4-database-setup)
-  - [5. Run the Application](#5-run-the-application)
+  - [2. Install Dependencies (Manual Setup)](#2-install-dependencies-manual-setup)
+  - [3. Environment Configuration (Manual Setup)](#3-environment-configuration-manual-setup)
+  - [4. Database Setup (Manual Setup)](#4-database-setup-manual-setup)
+  - [5. Run the Application (Manual Setup)](#5-run-the-application-manual-setup)
+- [Getting Started (With Docker)](#getting-started-with-docker) <!-- NEW SECTION -->
+  - [1. Clone the Repository (if not already done)](#1-clone-the-repository-if-not-already-done)
+  - [2. Environment Configuration (for Docker)](#2-environment-configuration-for-docker)
+  - [3. Build and Run Docker Containers](#3-build-and-run-docker-containers)
+  - [4. Initialize Application Inside Docker](#4-initialize-application-inside-docker)
+  - [5. Access the Application (Docker)](#5-access-the-application-docker)
+  - [6. Frontend Development (with Docker)](#6-frontend-development-with-docker)
+  - [7. Stopping Docker Containers](#7-stopping-docker-containers)
 - [API Endpoints](#api-endpoints)
   - [Authentication](#authentication)
   - [Products](#products)
-- [Deployment (Local Simulation)](#deployment-local-simulation)
 - [Future Enhancements (Bonus Points)](#future-enhancements-bonus-points)
 
 ## Project Overview
@@ -37,33 +45,41 @@ This application allows registered users to log in and manage a list of products
 *   Product attributes: Name, Price, Quantity, Status (in stock / out of stock).
 *   Frontend interface built with Bootstrap and Blade templates.
 *   RESTful API backend.
+*   Dockerized environment for development.
 
 ## Tech Stack
 
 *   **Backend:** Laravel (PHP Framework)
 *   **Frontend:** HTML, Bootstrap 5, JavaScript (Vanilla JS with Blade templating)
-*   **Database:** MySQL
+*   **Database:** MySQL 8.0
+*   **Web Server (in Docker):** Nginx
+*   **PHP Version (in Docker):** 8.2 (or your specified version, e.g., 8.1)
 *   **Authentication:** JWT (`tymon/jwt-auth` package)
-*   **PHP Version:** 8.1+ (Specify the version you used, e.g., PHP 8.1.10)
-*   **Node.js Version:** 18.x or 20.x (Specify the version you used, e.g., Node.js v18.17.0)
+*   **Containerization:** Docker, Docker Compose
+*   **Node.js Version (for host development):** 18.x or 20.x (Specify your version)
 *   **Composer**
 *   **NPM**
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed on your system:
-
-*   PHP (version specified above)
+**For Manual (Non-Docker) Setup:**
+*   PHP (version matching Docker, e.g., 8.2)
 *   Composer ([https://getcomposer.org/](https://getcomposer.org/))
 *   Node.js and npm (versions specified above) ([https://nodejs.org/](https://nodejs.org/))
-*   MySQL Server
+*   A local MySQL Server instance (e.g., via WAMP, XAMPP, MAMP, or standalone)
 *   A code editor (e.g., VS Code)
-*   An API client (e.g., Postman, Insomnia) for testing API endpoints directly.
+*   An API client (e.g., Postman, Insomnia)
+
+**For Docker Setup:**
+*   Docker Desktop ([https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/))
+*   Node.js and npm (for running `npm run dev` on the host, if preferred)
+*   A code editor
+*   An API client
 *   Git (optional, for version control)
 
-## Getting Started
+## Getting Started (Without Docker)
 
-Follow these steps to get the project up and running on your local machine.
+Follow these steps if you are **not** using Docker and want to set up the project directly on your local machine (e.g., using WAMP/XAMPP/MAMP).
 
 ### 1. Clone the Repository
 
@@ -73,39 +89,38 @@ Follow these steps to get the project up and running on your local machine.
 # cd mini_product_inventory_app_full_stack
 
 # If you are just setting it up from your local files, ensure you are in the project root:
-# cd C:\wamp64\www\mini_product_inventory_app_full_stack
+# cd C:\path\to\your\project\mini_product_inventory_app_full_stack
 ```
 
-### 2. Install Dependencies
+### 2. Install Dependencies (Manual Setup)
 
 Install backend (PHP) and frontend (Node.js) dependencies:
-
 ```bash
 composer install
 npm install
 ```
 
-### 3. Environment Configuration
+### 3. Environment Configuration (Manual Setup)
 
 *   Copy the `.env.example` file to a new file named `.env`:
     ```bash
     cp .env.example .env
     ```
     (On Windows, you can use `copy .env.example .env`)
-*   Open the `.env` file and configure your database connection and other settings:
+*   Open the `.env` file and configure your **local** database connection and other settings:
     ```dotenv
     APP_NAME="Mini Product Inventory"
     APP_ENV=local
     APP_KEY= # This will be generated in the next step
     APP_DEBUG=true
-    APP_URL=http://localhost:8000 # Or your WAMP/MAMP URL if not using `php artisan serve`
+    APP_URL=http://localhost:8000 # Or your local development server URL
 
     DB_CONNECTION=mysql
     DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=inventory_app_db # Or your chosen database name
-    DB_USERNAME=root             # Your MySQL username
-    DB_PASSWORD=                 # Your MySQL password (leave empty if none)
+    DB_PORT=3306 # Or your local MySQL port (e.g., 3308 if you changed it)
+    DB_DATABASE=inventory_app_db # Your chosen database name
+    DB_USERNAME=root             # Your local MySQL username
+    DB_PASSWORD=                 # Your local MySQL password
 
     JWT_SECRET= # This will be generated later
     ```
@@ -118,35 +133,138 @@ npm install
     php artisan jwt:secret
     ```
 
-### 4. Database Setup
+### 4. Database Setup (Manual Setup)
 
-*   Ensure your MySQL server is running.
-*   Create a new database in MySQL (e.g., using phpMyAdmin or a MySQL client) with the name you specified in `DB_DATABASE` (e.g., `inventory_app_db`).
-*   Run the database migrations to create the necessary tables:
+*   Ensure your local MySQL server is running.
+*   Create a new database in MySQL (e.g., using phpMyAdmin) with the name you specified in `DB_DATABASE`.
+*   Run the database migrations:
     ```bash
     php artisan migrate
     ```
-    *Note: If you encounter a "Specified key was too long" error during migration, ensure `Schema::defaultStringLength(191);` is set in the `boot()` method of your `app/Providers/AppServiceProvider.php` file.*
+    *Note: If you encounter a "Specified key was too long" error, ensure `Schema::defaultStringLength(191);` is in `app/Providers/AppServiceProvider.php`.*
 
-### 5. Run the Application
+### 5. Run the Application (Manual Setup)
 
-*   **Start the Laravel development server (for the backend API and serving Blade views):**
-    Open a terminal in the project root and run:
+*   Start the Laravel development server:
     ```bash
     php artisan serve
     ```
-    This will typically start the server at `http://127.0.0.1:8000`.
-
-*   **Start the Vite development server (for compiling frontend assets):**
-    Open a *separate* terminal in the project root and run:
+*   Start the Vite development server (in a separate terminal):
     ```bash
     npm run dev
     ```
-    Keep this running while you are developing the frontend.
+*   Access the application: `http://localhost:8000/login` (or your `APP_URL`).
 
-*   Access the application in your browser:
-    *   Login page: `http://127.0.0.1:8000/login`
-    *   Register page: `http://127.0.0.1:8000/register`
+---
+
+## Getting Started (With Docker)
+
+Follow these steps to run the application using Docker and Docker Compose. This is the recommended way for a consistent development environment.
+
+### 1. Clone the Repository (if not already done)
+```bash
+# If you have it on GitHub/GitLab:
+# git clone <your-repository-url>
+# cd mini_product_inventory_app_full_stack
+
+# If you are just setting it up from your local files, ensure you are in the project root:
+# cd C:\path\to\your\project\mini_product_inventory_app_full_stack
+```
+
+### 2. Environment Configuration (for Docker)
+
+*   Copy the `.env.example` file to a new file named `.env`:
+    ```bash
+    cp .env.example .env
+    ```
+    (On Windows, you can use `copy .env.example .env`)
+*   Open the `.env` file. **Ensure the following settings are configured for Docker:**
+    ```dotenv
+    APP_NAME="Mini Product Inventory (Docker)"
+    APP_ENV=local
+    APP_KEY= # Will be generated
+    APP_DEBUG=true
+    APP_URL=http://localhost:8000 # Or ${APP_DOCKER_PORT} if you set that in .env
+    APP_DOCKER_PORT=8000 # Port Nginx will listen on the host
+
+    DB_CONNECTION=mysql
+    DB_HOST=db # Service name of the MySQL container
+    DB_PORT=3306 # Internal port MySQL listens on inside Docker
+    DB_DATABASE=inventory_app_db # Must match MYSQL_DATABASE in docker-compose.yml
+    DB_USERNAME=devuser          # Must match MYSQL_USER in docker-compose.yml
+    DB_PASSWORD=devuser          # Must match MYSQL_PASSWORD in docker-compose.yml
+    DB_ROOT_PASSWORD=yourstrongrootpassword # Add a strong root password for the MySQL container itself
+    DB_DOCKER_PORT=33061 # Port MySQL will be accessible on the host (optional)
+
+    JWT_SECRET= # Will be generated
+
+    # For Vite HMR when npm run dev is on host and app is in Docker:
+    # VITE_DEV_SERVER_URL=http://localhost:5173 # (Adjust if your Vite port is different)
+    ```
+    **Important:** The `DB_HOST` must be `db` for the Laravel application inside Docker to connect to the MySQL container. `DB_USERNAME` and `DB_PASSWORD` must match the `MYSQL_USER` and `MYSQL_PASSWORD` environment variables set for the `db` service in `docker-compose.yml`.
+
+### 3. Build and Run Docker Containers
+
+*   Ensure Docker Desktop is running.
+*   From the project root directory, run:
+    ```bash
+    docker-compose up -d --build
+    ```
+    The first build might take some time as it downloads base images and installs dependencies.
+
+### 4. Initialize Application Inside Docker
+
+Once the containers are up and running (`docker-compose ps` to check):
+
+*   **Generate Application Key:**
+    ```bash
+    docker-compose exec app php artisan key:generate
+    ```
+*   **Generate JWT Secret:**
+    ```bash
+    docker-compose exec app php artisan jwt:secret
+    ```
+*   **Run Database Migrations:**
+    (Wait a few moments for the database container to be fully ready)
+    ```bash
+    docker-compose exec app php artisan migrate
+    ```
+*   **(Optional) Install Composer dependencies (if not handled by Dockerfile or if `vendor` is in `.dockerignore`):**
+    ```bash
+    # docker-compose exec app composer install
+    ```
+*   **(Optional) Set file permissions if needed:**
+    ```bash
+    # docker-compose exec app chown -R www:www /var/www/html/storage /var/www/html/bootstrap/cache
+    # docker-compose exec app chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+    ```
+
+### 5. Access the Application (Docker)
+
+*   Open your web browser and navigate to `http://localhost:8000` (or the port you set for `APP_DOCKER_PORT`).
+    *   Login: `http://localhost:8000/login`
+    *   Register: `http://localhost:8000/register`
+
+### 6. Frontend Development (with Docker)
+
+*   For compiling frontend assets (CSS, JS) and enabling Hot Module Replacement (HMR):
+    Open a **separate terminal on your host machine** (not inside a Docker container), navigate to the project root, and run:
+    ```bash
+    npm run dev
+    ```
+    Keep this running. Your browser (accessing `http://localhost:8000`) will connect to this Vite dev server for assets.
+    *Ensure `VITE_DEV_SERVER_URL=http://localhost:5173` (or your Vite port) is set in your `.env` if you encounter issues with asset loading or HMR.*
+
+### 7. Stopping Docker Containers
+
+*   To stop the containers:
+    ```bash
+    docker-compose down
+    ```
+*   To stop and remove volumes (including database data - **use with caution!**):
+    ```bash
+    docker-compose down -v
+    ```
 
 ## API Endpoints
 
@@ -175,5 +293,5 @@ The application exposes the following RESTful API endpoints. All product endpoin
 
 ## Deployment (Local Simulation)
 
-*(This section will be filled if Docker setup is implemented)*
+see the docker section
 Currently, the application is run using `php artisan serve` for the backend and `npm run dev` for frontend assets.
