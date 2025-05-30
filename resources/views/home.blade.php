@@ -15,6 +15,12 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+
+                    <div class="mt-3">
+                        <a href="{{ url('/products') }}" class="btn btn-primary">
+                            Go to Products
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

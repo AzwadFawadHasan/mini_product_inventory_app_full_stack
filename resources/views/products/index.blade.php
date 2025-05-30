@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    {{-- Alert for messages --}}
+    {{-- Alert for message --}}
     <div id="product-message" class="alert" style="display: none;"></div>
     <div class="mb-3 text-end">
         <button id="logout-button" class="btn btn-outline-danger">Logout</button>
@@ -82,21 +82,21 @@
 @endsection
 
 @push('scripts')
-<!--  Bootstrap JS  loaded  -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-   
+    console.log('[PRODUCTS SCRIPT] DOMContentLoaded'); 
 
     const productsTableBody = document.getElementById('productsTableBody');
     const productMessageDiv = document.getElementById('product-message');
 
     // Modal elements
-    let productModalInstance; 
+    let productModalInstance; // Declare here
     const productModalElement = document.getElementById('productModal');
-    if (productModalElement && typeof bootstrap !== 'undefined') { 
+    if (productModalElement && typeof bootstrap !== 'undefined') {
         productModalInstance = new bootstrap.Modal(productModalElement);
- 
+        
     } else {
         console.error('Bootstrap Modal element not found or bootstrap JS not loaded.'); 
     }
@@ -121,14 +121,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function showProductMessage(message, type = 'success') {
-        
+        console.log(`[PRODUCTS SCRIPT] showProductMessage: ${message}, type: ${type}`); // DEBUG
         productMessageDiv.textContent = message;
         productMessageDiv.className = `alert alert-${type} alert-dismissible fade show`;
         productMessageDiv.style.display = 'block';
-        // close button for persistent messages
+      
         setTimeout(() => {
-            if (productMessageDiv.style.display === 'block') { // Check if still visible
-                 
+            if (productMessageDiv.style.display === 'block') {
+             
                  const bsAlert = bootstrap.Alert.getInstance(productMessageDiv);
                  if (bsAlert) bsAlert.close(); else productMessageDiv.style.display = 'none';
             }
@@ -153,16 +153,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function apiCall(endpoint, method = 'GET', body = null) {
-
+        console.log(`apiCall: ${method} ${endpoint}`, body || ''); // DEBUG
         const token = getToken();
         if (!token && endpoint !== '/api/login' && endpoint !== '/api/register') {
-
+            console.warn('apiCall: No token, redirecting to login.'); // DEBUG
             window.location.href = '/login';
             throw new Error('No token found, redirecting to login.');
         }
 
         const headers = { 'Accept': 'application/json' };
-        if (token) { // Only add Auth header if token existss
+        if (token) { // Only add Auth header if token exists
             headers['Authorization'] = `Bearer ${token}`;
         }
         if (body) {
@@ -176,10 +176,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             const response = await fetch(endpoint, config);
-            // console.log(`apiCall response status for ${method} ${endpoint}: ${response.status}`);
+          
 
             if (response.status === 401) {
-                //clear tokesn and redirect
+           
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('user');
                 showProductMessage('Session expired. Please log in again.', 'danger');
@@ -188,13 +188,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             return response;
         } catch (error) {
-            // console.error(`apiCall fetch error for ${method} ${endpoint}:`, error);
+            console.error(` apiCall fetch error for ${method} ${endpoint}:`, error); 
             throw error; // Re-throw to be caught by caller
         }
     }
 
     function renderProducts(products) {
-        // console.log('renderProducts called with:', products);
+        
         productsTableBody.innerHTML = '';
 
         if (!products || products.length === 0) {
@@ -233,25 +233,25 @@ document.addEventListener('DOMContentLoaded', function () {
             button.removeEventListener('click', handleDeleteButtonClick); // Remove old if any
             button.addEventListener('click', handleDeleteButtonClick);
         });
-
+   
     }
-    // function  handlers separately to make removeEventListener work reliably
+    // Define handlers separately to make removeEventListener work reliably
     function handleEditButtonClick() { handleOpenEditModal(this.dataset.id); }
     function handleDeleteButtonClick() { handleDeleteProduct(this.dataset.id); }
 
 
     async function fetchProducts() {
-
+ 
         productsTableBody.innerHTML = `<tr><td colspan="6" class="text-center">Loading products...</td></tr>`;
         try {
             const response = await apiCall('/api/products');
             if (response.ok) {
                 const products = await response.json();
-                // console.log('Products fetched successfully from API:', products); 
+        
                 renderProducts(products);
             } else {
                 const errorText = await response.text(); // Get text for better debugging
-                // failed
+                console.error('[PRODUCTS SCRIPT] Failed to fetch products API response not OK. Status:', response.status, 'Response Text:', errorText); // DEBUG
                 let errorMsg = 'Failed to load products.';
                 try {
                     const errorData = JSON.parse(errorText);
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 productsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to load products. See console.</td></tr>`;
             }
         } catch (error) {
-    
+            console.error('Catch block in fetchProducts:', error); 
             if (error.message !== 'Unauthorized' && error.message !== 'No token found, redirecting to login.') {
                 showProductMessage('An error occurred while loading products.', 'danger');
                 productsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">An error occurred. See console.</td></tr>`;
@@ -271,21 +271,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (addProductBtn) { 
         addProductBtn.addEventListener('click', function() {
-        // add button click
+       
             currentEditProductId = null;
             if (productModalLabel) productModalLabel.textContent = 'Add Product';
             if (productForm) productForm.reset();
             if (productIdInput) productIdInput.value = '';
             hideProductFormError();
-            // Modal is opened via data-bs-toggle attributes on the button
+           
         });
     } else {
-        console.error('Add Product button (addProductBtn) not found!'); 
+        console.error('Product button (addProductBtn) not found!'); 
     }
 
 
     async function handleOpenEditModal(productId) {
-   
+  
         currentEditProductId = productId;
         if (productModalLabel) productModalLabel.textContent = 'Edit Product';
         if (productForm) productForm.reset();
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await apiCall(`/api/products/${productId}`);
             if (response.ok) {
                 const product = await response.json();
-   
+               
                 if(productIdInput) productIdInput.value = product.id;
                 if(productNameInput) productNameInput.value = product.name;
                 if(productPriceInput) productPriceInput.value = parseFloat(product.price).toFixed(2);
@@ -311,11 +311,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error("Modal instance not available to show for edit");
                 }
             } else {
-                console.error('Failed to load product details for editing. Status:', response.status); /
+                console.error('Failed to load product details for editing. Status:', response.status); 
                 showProductMessage('Failed to load product details for editing.', 'danger');
             }
         } catch (error) {
-            
+             console.error('Error in handleOpenEditModal:', error); 
              if (error.message !== 'Unauthorized') {
                 showProductMessage('Error fetching product details.', 'danger');
              }
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (saveProductBtn) { 
         saveProductBtn.addEventListener('click', async function() {
-  
+    
             hideProductFormError();
             const productData = {
                 name: productNameInput.value.trim(),
@@ -332,11 +332,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 quantity: parseInt(productQuantityInput.value),
                 status: productStatusInput.value
             };
-
+          
 
             if (!productData.name || isNaN(productData.price) || productData.price < 0 || isNaN(productData.quantity) || productData.quantity < 0) {
                 showProductFormError('Please fill in all fields correctly. Price and quantity cannot be negative.');
-         
+                console.warn('Frontend validation failed for save product.'); 
                 return;
             }
 
@@ -347,14 +347,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 url = `/api/products/${currentEditProductId}`;
                 method = 'PUT';
             }
-            //saving
+           
 
             try {
                 const response = await apiCall(url, method, productData);
                 let responseData = {};
                 try {
                     responseData = await response.json();
-                    console.log('Save product API response data:', responseData); 
+                  
                 } catch (e) {
                     console.error('Failed to parse JSON from save product response. Status:', response.status, 'Response Text:', await response.text()); 
                     showProductFormError('Received an invalid response from the server.');
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     fetchProducts();
                 } else {
-                    console.warn('Save product API call not OK. Status:', response.status); 
+                    // console.warn('Save product API call not OK. Status:', response.status); 
                     if (responseData.errors) {
                         const errors = Object.values(responseData.errors).flat().join(' ');
                         showProductFormError(`Validation failed: ${errors}`);
@@ -392,14 +392,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     } else {
-        console.error('Save Product button (saveProductBtn) not found!'); 
+        console.error(' Save Product button (saveProductBtn) not found!'); 
     }
 
 
     async function handleDeleteProduct(productId) {
-
+        console.log('handleDeleteProduct for ID:', productId); 
         if (!confirm('Are you sure you want to delete this product?')) {
-            console.log(' Delete cancelled by user.'); 
+ 
             return;
         }
         try {
@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetchProducts();
             } else {
                 const errorText = await response.text();
-
+                console.error('Failed to delete product. Status:', response.status, 'Response Text:', errorText); 
                 let errorMsg = 'Failed to delete product.';
                 try {
                     const errorData = JSON.parse(errorText);
@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showProductMessage(`Error deleting product: ${errorMsg}`, 'danger');
             }
         } catch (error) {
-
+            console.error('Catch block in handleDeleteProduct:', error); 
             if (error.message !== 'Unauthorized') {
                 showProductMessage('An error occurred while deleting the product.', 'danger');
             }
@@ -426,37 +426,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- Initial Setup ---
-  
+   
     if (!getToken()) {
-        // no tokes found
+        console.warn('Initial setup: No token found, redirecting to login.'); 
         window.location.href = '/login';
     } else {
-       
+
         fetchProducts();
     }
 
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
-
+       
         logoutButton.addEventListener('click', async function(event) {
             event.preventDefault(); // Prevent default if it's a link
-       
+   
             try {
                 await apiCall('/api/logout', 'POST');
-                console.log('Logout API call successful or handled.'); 
+                
             } catch (error) {
-                console.error(" Logout API call failed, but clearing client session anyway.", error);
+                console.error("Logout API call failed, but clearing client session anyway.", error);
             } finally {
-                console.log('Clearing localStorage and redirecting to login.'); 
+                
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('user');
                 window.location.href = '/login';
             }
         });
     } else {
-        console.warn('Logout button (logout-button) not found.'); 
+        console.warn('Logout button (logout-button) not found.');
     }
 });
 </script>
 @endpush
-
