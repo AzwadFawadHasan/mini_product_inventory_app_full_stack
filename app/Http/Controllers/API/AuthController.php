@@ -83,7 +83,8 @@ public function __construct()
      */
     public function refresh()
     {
-        return $this->createNewToken(auth('api')->refresh());
+        $token = JWTAuth::refresh(JWTAuth::getToken());
+        return $this->createNewToken($token);
     }
 
     /**
@@ -105,7 +106,7 @@ public function __construct()
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60, // in seconds
+            'expires_in' => JWTAuth::factory()->getTTL() * 60, // in seconds
             'user' => auth('api')->user()
         ]);
     }
