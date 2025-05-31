@@ -298,3 +298,19 @@ Currently, to run locally the application is run using `php artisan serve` for t
 
 ##### misc
 ![Visitor Count](https://visitor-badge.laobi.icu/badge?page_id=AzwadFawadHasan.mini_product_inventory_app_full_stack)
+
+## some screenshots:
+![image](https://github.com/user-attachments/assets/61892842-cf7e-4506-91a5-8c0f4ff60863)
+![image](https://github.com/user-attachments/assets/d6ab3490-662b-4e6f-aaf0-8a9f793a0a5e)
+![image](https://github.com/user-attachments/assets/1d46d3a5-0eb0-41e0-a4d3-29c0b23016dc)
+![image](https://github.com/user-attachments/assets/a3bc0d81-c27c-45bd-8e4c-6cd9b354f97d)
+![image](https://github.com/user-attachments/assets/7da25ae1-660b-4bdc-a752-55b4a403a3e5)
+![image](https://github.com/user-attachments/assets/14cd7a45-1cfa-42e4-8634-1095f87e944b)
+![image](https://github.com/user-attachments/assets/34680483-522b-42e1-99a1-e4ca577a1a31)
+
+
+
+
+
+
+
