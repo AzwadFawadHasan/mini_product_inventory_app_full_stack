@@ -294,4 +294,7 @@ The application exposes the following RESTful API endpoints. All product endpoin
 ## Deployment (Local Simulation)
 
 see the docker section
-Currently, the application is run using `php artisan serve` for the backend and `npm run dev` for frontend assets.
+Currently, to run locally the application is run using `php artisan serve` for the backend and `npm run dev` for frontend assets.
+
+##### misc
+![Visitor Count](https://visitor-badge.laobi.icu/badge?page_id=AzwadFawadHasan.mini_product_inventory_app_full_stack)
